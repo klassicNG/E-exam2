@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Directorate Cadre Promotion Examination 2025</title>
+    <!-- Load Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom styles for the exam interface */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f7f9fc; /* Light background for professionalism */
+      }
+      .container-shadow {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      }
+      .correct-answer {
+        background-color: #34d399 !important; /* Tailwind green-400 */
+        border-color: #059669 !important; /* Tailwind green-600 */
+        color: #064e3b !important; /* Tailwind green-900 */
+        font-weight: 600;
+      }
+      .wrong-answer {
+        background-color: #fca5a5 !important; /* Tailwind red-300 */
+        border-color: #dc2626 !important; /* Tailwind red-600 */
+        color: #7f1d1d !important; /* Tailwind red-900 */
+      }
+      .selected-option {
+        border: 3px solid #3b82f6; /* Tailwind blue-500 */
+      }
+      .option-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.8;
+      }
+      .option-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+    <div
+      id="exam-app"
+      class="w-full max-w-4xl bg-white rounded-xl container-shadow p-6 md:p-10 transition-all duration-300"
+    >
+      <!-- Header & Status Bar -->
+      <header
+        class="mb-6 pb-4 border-b-2 border-indigo-100 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0"
+      >
+        <h1
+          class="text-2xl md:text-3xl font-bold text-indigo-700 text-center sm:text-left"
+        >
+          Directorate Cadre Promotion Exam 2025
+        </h1>
+        <div
+          class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 font-semibold text-lg"
+        >
+          <div
+            id="timer-display"
+            class="p-2 px-4 rounded-lg bg-red-100 text-red-700 shadow-md"
+          >
+            Time: 60:00
+          </div>
+          <div
+            id="score-display"
+            class="p-2 px-4 rounded-lg bg-blue-100 text-blue-700 shadow-md"
+          >
+            Score: 0.00%
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Question Area -->
+      <div id="exam-content" class="min-h-[400px]">
+        <!-- Content will be injected here (Question, Options, Navigation) -->
+        <p class="text-center text-gray-500 mt-20">
+          Click 'Start Exam' to begin.
+        </p>
+      </div>
+
+      <!-- Start Button / Results Area -->
+      <div id="start-screen" class="text-center py-10">
+        <h2 class="text-xl font-semibold mb-4 text-gray-700">Instructions:</h2>
+        <ul
+          class="list-disc list-inside text-left inline-block mb-6 text-gray-600"
+        >
+          <li>
+            Total Questions: 150 (50 per section: Education, Public Service,
+            General Knowledge).
+          </li>
+          <li>Duration: 60 minutes.</li>
+          <li>
+            Instant Feedback: Correct answers turn green, incorrect answers turn
+            red and highlight the correct one in green.
+          </li>
+          <li>
+            You must answer the current question before moving to the next one.
+          </li>
+        </ul>
+        <button
+          id="start-button"
+          class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-700 transition duration-150 shadow-lg hover:shadow-xl text-xl"
+        >
+          Start Exam (150 Questions)
+        </button>
+      </div>
+
+      <!-- Result Modal (Hidden initially) -->
+      <div
+        id="result-modal"
+        class="hidden fixed inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-white p-8 md:p-12 rounded-xl max-w-md w-full text-center shadow-2xl"
+        >
+          <h2 class="text-4xl font-extrabold mb-4 text-indigo-700">
+            EXAM COMPLETED!
+          </h2>
+          <p class="text-xl text-gray-600 mb-6">
+            Congratulations on completing the Directorate Cadre Examination.
+          </p>
+          <div class="mb-8">
+            <p class="text-lg font-semibold text-gray-700">
+              Total Questions Answered:
+            </p>
+            <p id="result-answered" class="text-3xl font-bold text-indigo-500">
+              0 / 150
+            </p>
+          </div>
+          <div class="mb-8 p-4 rounded-lg bg-green-50">
+            <p class="text-lg font-semibold text-gray-700">
+              Final Percentage Score:
+            </p>
+            <p
+              id="final-percentage"
+              class="text-5xl font-extrabold text-green-600 mt-2"
+            >
+              0.00%
+            </p>
+          </div>
+          <button
+            onclick="window.location.reload();"
+            class="px-6 py-3 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition duration-150 shadow-lg"
+          >
+            Restart Examination
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Data structure for all 150 questions
+      const QUESTIONS = [
+        // --- SECTION A: EDUCATION (E1-E50) ---
+        {
+          id: 1,
+          category: "Education",
+          question:
+            "The Universal Basic Education (UBE) Act of 2004 makes education compulsory for children of which age group?",
+          options: ["3-18 years", "6-15 years", "5-11 years", "0-12 years"],
+          correctAnswer: "6-15 years",
+        },
+        {
+          id: 2,
+          category: "Education",
+          question:
+            "Which agency is primarily responsible for administering the UBE Programme in Nigeria, established by the 2004 Act?",
+          options: ["JAMB", "TETFund", "UBEC", "NERDC"],
+          correctAnswer: "UBEC",
+        },
+        {
+          id: 3,
+          category: "Education",
+          question:
+            "The current major curriculum overhaul (post-2024 announcements) in Nigeria is primarily aimed at achieving what?",
+          options: [
+            "Increasing school fees",
+            "Reducing subject overload and promoting skill development",
+            "Mandating 16 years as minimum tertiary entry age",
+            "Centralizing all teacher training",
+          ],
+          correctAnswer:
+            "Reducing subject overload and promoting skill development",
+        },
+        {
+          id: 4,
+          category: "Education",
+          question:
+            "The National Policy on Education (NPE) in Nigeria states that the philosophy of Nigerian education is based on the integration of the individual into a sound and effective citizen and the provision of which type of equality?",
+          options: [
+            "Equality of wealth",
+            "Equality of educational opportunities",
+            "Equality of social status",
+            "Equality of outcome",
+          ],
+          correctAnswer: "Equality of educational opportunities",
+        },
+        {
+          id: 5,
+          category: "Education",
+          question:
+            "The 6-3-3-4 system in the Nigerian education structure refers to:",
+          options: [
+            "Primary-JSS-SSS-Tertiary",
+            "Pre-primary-Primary-Secondary-University",
+            "Primary-JSS-SSS-Professional",
+            "JSS-SSS-Technical-University",
+          ],
+          correctAnswer: "Primary-JSS-SSS-Tertiary",
+        },
+        {
+          id: 6,
+          category: "Education",
+          question:
+            "The main purpose of supervision in the education sector is to:",
+          options: [
+            "Punish non-performing teachers",
+            "Improve the quality of instruction and learning",
+            "Reduce government expenditure on schools",
+            "Determine teacher promotion eligibility",
+          ],
+          correctAnswer: "Improve the quality of instruction and learning",
+        },
+        {
+          id: 7,
+          category: "Education",
+          question:
+            "Which body is responsible for curriculum development and review at the national level in Nigeria?",
+          options: ["NUC", "NERDC", "NBTE", "WAEC"],
+          correctAnswer: "NERDC",
+        },
+        {
+          id: 8,
+          category: "Education",
+          question:
+            "The minimum number of years required for teacher training in Nigeria before being certified for basic education is determined by which body?",
+          options: [
+            "National Teachers' Institute (NTI)",
+            "Teachers Registration Council of Nigeria (TRCN)",
+            "Federal Ministry of Education (FME)",
+            "National Commission for Colleges of Education (NCCE)",
+          ],
+          correctAnswer: "Teachers Registration Council of Nigeria (TRCN)",
+        },
+        {
+          id: 9,
+          category: "Education",
+          question:
+            "A key objective of Technical and Vocational Education and Training (TVET) in Nigeria is to:",
+          options: [
+            "Prepare students only for university admission",
+            "Provide manpower in applied sciences and technology",
+            "Reduce the duration of secondary schooling",
+            "Promote rote memorization skills",
+          ],
+          correctAnswer: "Provide manpower in applied sciences and technology",
+        },
+        {
+          id: 10,
+          category: "Education",
+          question:
+            "The term 'learning poor' in the context of Nigerian education reforms (2025) primarily refers to children who:",
+          options: [
+            "Cannot afford uniforms",
+            "Are in school but not acquiring basic literacy and numeracy skills",
+            "Are above the age of 16 in secondary school",
+            "Have dropped out of school completely",
+          ],
+          correctAnswer:
+            "Are in school but not acquiring basic literacy and numeracy skills",
+        },
+        {
+          id: 11,
+          category: "Education",
+          question:
+            "What punishment is liable for a parent who contravenes Section 2(2) of the UBE Act (failing to send a child to school) on second conviction?",
+          options: [
+            "Reprimand only",
+            "A fine of N5,000.00 only",
+            "A fine of N2,000.00 or imprisonment for one month or both",
+            "Payment of school fees for the child",
+          ],
+          correctAnswer:
+            "A fine of N2,000.00 or imprisonment for one month or both",
+        },
+        {
+          id: 12,
+          category: "Education",
+          question:
+            "The policy framework aimed at transitioning Nigeria from a resource-dependent economy to a knowledge-driven one, as highlighted in 2025 reforms, is known as:",
+          options: [
+            "Educational Sector Renewal Initiative (ESRI)",
+            "Nigeria Education Sector Renewal Initiative (NESRI)",
+            "Vision 2050 Education Plan",
+            "Universal Education Transformation Act (UETA)",
+          ],
+          correctAnswer: "Nigeria Education Sector Renewal Initiative (NESRI)",
+        },
+        {
+          id: 13,
+          category: "Education",
+          question:
+            "What is the primary role of the National Commission for Mass Literacy, Adult and Non-formal Education (NMEC)?",
+          options: [
+            "Conducting WAEC examinations",
+            "Developing university curricula",
+            "Eradicating illiteracy among adults and out-of-school youths",
+            "Managing primary school funding",
+          ],
+          correctAnswer:
+            "Eradicating illiteracy among adults and out-of-school youths",
+        },
+        {
+          id: 14,
+          category: "Education",
+          question:
+            "Which of the following is NOT a core objective of the UBE Programme?",
+          options: [
+            "Developing strong consciousness for education",
+            "Ensuring acquisition of appropriate life skills",
+            "Providing free, universal basic education",
+            "Funding private primary schools",
+          ],
+          correctAnswer: "Funding private primary schools",
+        },
+        {
+          id: 15,
+          category: "Education",
+          question:
+            "The concept of 'Education for All' (EFA) that influenced UBE was adopted at which global conference in 1990?",
+          options: [
+            "Dakar, Senegal",
+            "Jomtien, Thailand",
+            "Beijing, China",
+            "Paris, France",
+          ],
+          correctAnswer: "Jomtien, Thailand",
+        },
+        {
+          id: 16,
+          category: "Education",
+          question:
+            "What minimum standard is UBEC mandated to prescribe for basic education throughout Nigeria?",
+          options: [
+            "Teacher-student ratio only",
+            "Minimum school building dimensions",
+            "Minimum standards in line with the National Policy on Education",
+            "Maximum tuition fee limits",
+          ],
+          correctAnswer:
+            "Minimum standards in line with the National Policy on Education",
+        },
+        {
+          id: 17,
+          category: "Education",
+          question:
+            "The reintroduction of which subject as compulsory from Primary 1 to JSS 3 is a key feature of the 2025 curriculum review?",
+          options: [
+            "Computer Science",
+            "Nigerian History",
+            "Foreign Language",
+            "Technical Drawing",
+          ],
+          correctAnswer: "Nigerian History",
+        },
+        {
+          id: 18,
+          category: "Education",
+          question:
+            "The National Anti-Bullying Policy introduced in 2025 covers all the following types of bullying EXCEPT:",
+          options: [
+            "Physical bullying",
+            "Verbal bullying",
+            "Cyber bullying",
+            "Political bullying",
+          ],
+          correctAnswer: "Political bullying",
+        },
+        {
+          id: 19,
+          category: "Education",
+          question: "The acronym NUC stands for:",
+          options: [
+            "National University Commission",
+            "Nigerian Union of Communicators",
+            "National Universities Commission",
+            "National Universal Curriculum",
+          ],
+          correctAnswer: "National Universities Commission",
+        },
+        {
+          id: 20,
+          category: "Education",
+          question:
+            "The major challenge facing the success of curriculum reform in Nigeria, according to experts, often involves the resistance of the existing examination bodies (WAEC and NECO) which remain rooted in:",
+          options: [
+            "Competency-based assessment",
+            "Skill acquisition evaluation",
+            "Rote learning",
+            "Vocational testing",
+          ],
+          correctAnswer: "Rote learning",
+        },
+        {
+          id: 21,
+          category: "Education",
+          question:
+            "In the context of school administration, 'in-service training' (INSET) for teachers is primarily intended to:",
+          options: [
+            "Replace all old teachers",
+            "Improve teaching methods and subject matter knowledge",
+            "Reduce administrative workload",
+            "Determine salary increase eligibility",
+          ],
+          correctAnswer:
+            "Improve teaching methods and subject matter knowledge",
+        },
+        {
+          id: 22,
+          category: "Education",
+          question:
+            "What is the highest policymaking body in the Nigerian education sector?",
+          options: [
+            "National Council on Education (NCE)",
+            "National Assembly",
+            "Federal Executive Council (FEC)",
+            "Joint Admissions and Matriculation Board (JAMB)",
+          ],
+          correctAnswer: "National Council on Education (NCE)",
+        },
+        {
+          id: 23,
+          category: "Education",
+          question: "A school's prospectus primarily serves as:",
+          options: [
+            "A list of all alumni",
+            "A detailed outline of the school's structure, policies, and courses",
+            "The school's financial budget",
+            "The disciplinary manual only",
+          ],
+          correctAnswer:
+            "A detailed outline of the school's structure, policies, and courses",
+        },
+        {
+          id: 24,
+          category: "Education",
+          question:
+            "The concept of 'whole school approach' in educational reform focuses on:",
+          options: [
+            "Focusing only on academic subjects",
+            "Integrating all aspects of the school life into teaching and learning",
+            "Hiring foreign consultants",
+            "Limiting parental involvement",
+          ],
+          correctAnswer:
+            "Integrating all aspects of the school life into teaching and learning",
+        },
+        {
+          id: 25,
+          category: "Education",
+          question:
+            "In the context of school funding, what does PTA typically stand for?",
+          options: [
+            "Public Training Authority",
+            "Parents Teachers Association",
+            "Primary Tuition Agency",
+            "Progressive Teaching Act",
+          ],
+          correctAnswer: "Parents Teachers Association",
+        },
+        {
+          id: 26,
+          category: "Education",
+          question:
+            "The LUMINAH programme, part of the NESRI framework, specifically targets improving education for which demographic?",
+          options: [
+            "Out-of-school boys",
+            "Teachers in rural areas",
+            "Out-of-school girls",
+            "Students in technical colleges",
+          ],
+          correctAnswer: "Out-of-school girls",
+        },
+        {
+          id: 27,
+          category: "Education",
+          question:
+            "The Federal Ministry of Education's reform strategy emphasizes the need for assessment to shift towards measuring:",
+          options: [
+            "Memorization capacity",
+            "Social media usage",
+            "Problem-solving, creativity, and application",
+            "Physical fitness only",
+          ],
+          correctAnswer: "Problem-solving, creativity, and application",
+        },
+        {
+          id: 28,
+          category: "Education",
+          question:
+            "According to the UBE Act, who has jurisdiction to hear and determine cases arising under section 2 (failure of parents to enroll children)?",
+          options: [
+            "High Court",
+            "Federal High Court",
+            "Magistrate's Court or any other State Court of competent jurisdiction",
+            "Traditional Rulers' Council",
+          ],
+          correctAnswer:
+            "Magistrate's Court or any other State Court of competent jurisdiction",
+        },
+        {
+          id: 29,
+          category: "Education",
+          question: "The term 'pedagogy' in education refers to:",
+          options: [
+            "The study of child psychology",
+            "The art and science of teaching",
+            "The administrative control of schools",
+            "The process of curriculum review",
+          ],
+          correctAnswer: "The art and science of teaching",
+        },
+        {
+          id: 30,
+          category: "Education",
+          question:
+            "A 'Scheme of Work' is essential for a teacher because it outlines:",
+          options: [
+            "The teacher's annual salary structure",
+            "The detailed plan of topics to be covered over a specific period",
+            "The school's disciplinary policies",
+            "The report card template",
+          ],
+          correctAnswer:
+            "The detailed plan of topics to be covered over a specific period",
+        },
+        {
+          id: 31,
+          category: "Education",
+          question:
+            "Which of the following is a primary duty of a Director in the Ministry of Education?",
+          options: [
+            "Sweeping the classrooms",
+            "Policy formulation, execution, and resource management within their directorate",
+            "Teaching primary school pupils",
+            "Conducting WAEC/NECO exams",
+          ],
+          correctAnswer:
+            "Policy formulation, execution, and resource management within their directorate",
+        },
+        {
+          id: 32,
+          category: "Education",
+          question:
+            "The 'Triple Helix' model in education often refers to the collaboration between:",
+          options: [
+            "Parents, Teachers, and Students",
+            "Federal, State, and Local Governments",
+            "Government, Academia, and Industry",
+            "NERDC, UBEC, and TRCN",
+          ],
+          correctAnswer: "Government, Academia, and Industry",
+        },
+        {
+          id: 33,
+          category: "Education",
+          question:
+            "What is the key advantage of a 'learner-centered' approach to teaching?",
+          options: [
+            "It reduces the teacher's workload significantly",
+            "It focuses on the learner's needs, interests, and active participation",
+            "It is the cheapest teaching method",
+            "It requires zero infrastructure",
+          ],
+          correctAnswer:
+            "It focuses on the learner's needs, interests, and active participation",
+        },
+        {
+          id: 34,
+          category: "Education",
+          question:
+            "TETFund (Tertiary Education Trust Fund) is primarily responsible for funding intervention projects in which educational level?",
+          options: [
+            "Primary education only",
+            "Secondary education only",
+            "Technical and Vocational Education and Training (TVET)",
+            "Tertiary education",
+          ],
+          correctAnswer: "Tertiary education",
+        },
+        {
+          id: 35,
+          category: "Education",
+          question:
+            "The term 'E-Learning' is best described as learning facilitated by:",
+          options: [
+            "Printed textbooks",
+            "Face-to-face interaction",
+            "Electronic devices and digital resources",
+            "Verbal lectures only",
+          ],
+          correctAnswer: "Electronic devices and digital resources",
+        },
+        {
+          id: 36,
+          category: "Education",
+          question:
+            "The goal of integrating digital literacy into the curriculum is to ensure students can:",
+          options: [
+            "Become professional software developers",
+            "Effectively use technology to find, evaluate, create, and communicate information",
+            "Buy and sell products online",
+            "Only play computer games",
+          ],
+          correctAnswer:
+            "Effectively use technology to find, evaluate, create, and communicate information",
+        },
+        {
+          id: 37,
+          category: "Education",
+          question:
+            "The maximum number of subjects recommended for pupils in Primary 1–3 under the 2025 curriculum review is:",
+          options: [
+            "5 subjects",
+            "9–10 subjects",
+            "12–14 subjects",
+            "15 subjects",
+          ],
+          correctAnswer: "9–10 subjects",
+        },
+        {
+          id: 38,
+          category: "Education",
+          question:
+            "Which of the following is NOT a core challenge mentioned in implementing Nigeria's education reforms?",
+          options: [
+            "Funding gaps",
+            "Teacher preparedness",
+            "Infrastructure deficit",
+            "Oversupply of high-quality textbooks",
+          ],
+          correctAnswer: "Oversupply of high-quality textbooks",
+        },
+        {
+          id: 39,
+          category: "Education",
+          question:
+            "What does the acronym ECCE stand for in the Nigerian educational context?",
+          options: [
+            "Early Career and Citizen Education",
+            "Environment and Climate Change Education",
+            "Early Childhood Care and Education",
+            "Enhanced Curriculum and College Entrance",
+          ],
+          correctAnswer: "Early Childhood Care and Education",
+        },
+        {
+          id: 40,
+          category: "Education",
+          question:
+            "The Federal Government’s goal of integrating 25,000 children into education through NESRI is an effort to tackle the problem of:",
+          options: [
+            "Teacher shortage",
+            "Out-of-school children",
+            "University admission backlog",
+            "Poor WAEC results",
+          ],
+          correctAnswer: "Out-of-school children",
+        },
+        {
+          id: 41,
+          category: "Education",
+          question:
+            "The main statutory role of the Teachers Registration Council of Nigeria (TRCN) is to:",
+          options: [
+            "Pay teachers' salaries",
+            "Accredit all public schools",
+            "Regulate and control the teaching profession",
+            "Construct school buildings",
+          ],
+          correctAnswer: "Regulate and control the teaching profession",
+        },
+        {
+          id: 42,
+          category: "Education",
+          question:
+            "Which subject was introduced at the senior secondary level in the 2025 review by merging Nigerian History, Civic Education, and Social Studies?",
+          options: [
+            "National Identity Studies",
+            "Citizenship and Heritage Studies",
+            "Societal Development",
+            "Political History",
+          ],
+          correctAnswer: "Citizenship and Heritage Studies",
+        },
+        {
+          id: 43,
+          category: "Education",
+          question:
+            "Continuous Assessment (CA) is typically weighted what percentage of the total score in most Nigerian secondary schools?",
+          options: ["20%", "30%", "40%", "50%"],
+          correctAnswer: "40%",
+        },
+        {
+          id: 44,
+          category: "Education",
+          question:
+            "What does the term 'Special Education' address in the Nigerian context?",
+          options: [
+            "Education for gifted students only",
+            "Education for students with special needs and disabilities",
+            "Education funded by foreign donors",
+            "Education taught in local languages",
+          ],
+          correctAnswer:
+            "Education for students with special needs and disabilities",
+        },
+        {
+          id: 45,
+          category: "Education",
+          question:
+            "The policy requiring teachers to be trained on the 'digital quality assurance programme' is related to:",
+          options: [
+            "Infrastructure deficit",
+            "Data digitization and accountability",
+            "New fee structures",
+            "School transportation",
+          ],
+          correctAnswer: "Data digitization and accountability",
+        },
+        {
+          id: 46,
+          category: "Education",
+          question:
+            "The 'Education for Change' policy introduced by the Federal Government is focused on:",
+          options: [
+            "Changing all school names",
+            "Reforming the basic education sub-sector",
+            "Stopping private education",
+            "Reducing the number of universities",
+          ],
+          correctAnswer: "Reforming the basic education sub-sector",
+        },
+        {
+          id: 47,
+          category: "Education",
+          question:
+            "A directorate cadre officer's role in policy implementation requires strong skills in:",
+          options: [
+            "Manual labor",
+            "Micro-level classroom teaching",
+            "Strategic planning and delegation",
+            "Artistic performance",
+          ],
+          correctAnswer: "Strategic planning and delegation",
+        },
+        {
+          id: 48,
+          category: "Education",
+          question:
+            "The minimum age for entry into primary school in Nigeria, as stated by policy, is usually:",
+          options: ["3 years", "6 years", "9 years", "12 years"],
+          correctAnswer: "6 years",
+        },
+        {
+          id: 49,
+          category: "Education",
+          question:
+            "In the education system, a 'dropout' is defined as a child who:",
+          options: [
+            "Is temporarily absent from school",
+            "Leaves school prematurely without completing the required educational level",
+            "Transfers schools",
+            "Fails a grade",
+          ],
+          correctAnswer:
+            "Leaves school prematurely without completing the required educational level",
+        },
+        {
+          id: 50,
+          category: "Education",
+          question:
+            "The purpose of establishing a Basic Education Data Bank (BEDB) by UBEC is primarily for:",
+          options: [
+            "Storing political party data",
+            "Conducting research and effective planning using accurate data",
+            "Printing textbooks",
+            "Monitoring rainfall patterns",
+          ],
+          correctAnswer:
+            "Conducting research and effective planning using accurate data",
+        },
+
+        // --- SECTION B: PUBLIC SERVICE RELATION (P51-P100) ---
+        {
+          id: 51,
+          category: "Public Service Relation",
+          question:
+            "According to the Public Service Rules (PSR), what is the minimum percentage score required at an interview for an officer to be eligible for promotion to the next grade level?",
+          options: ["50%", "60%", "65%", "75%"],
+          correctAnswer: "60%",
+        },
+        {
+          id: 52,
+          category: "Public Service Relation",
+          question:
+            "The mandatory form used for assessing the annual performance of public officers in Nigeria is the:",
+          options: [
+            "Annual Service Report (ASR)",
+            "Staff Evaluation Form (SEF)",
+            "Annual Performance Evaluation Report (APER) Form",
+            "Career Progression Form (CPF)",
+          ],
+          correctAnswer: "Annual Performance Evaluation Report (APER) Form",
+        },
+        {
+          id: 53,
+          category: "Public Service Relation",
+          question:
+            "In the Civil Service, what term is used for the transfer of an officer from one Cadre to another based on acquiring additional qualifications?",
+          options: [
+            "Secondment",
+            "Re-designation",
+            "Conversion",
+            "Acting Appointment",
+          ],
+          correctAnswer: "Conversion",
+        },
+        {
+          id: 54,
+          category: "Public Service Relation",
+          question:
+            "Which of the following is generally considered 'Serious Misconduct' under the PSR, often leading to dismissal?",
+          options: [
+            "Tardiness",
+            "Refusal to proceed on transfer",
+            "Falsification of age",
+            "Absence without leave for one day",
+          ],
+          correctAnswer: "Falsification of age",
+        },
+        {
+          id: 55,
+          category: "Public Service Relation",
+          question:
+            "What is the primary weighting of the interview performance in the overall promotion exercise for directorate cadre officers?",
+          options: ["30%", "50%", "70%", "80%"],
+          correctAnswer: "70%",
+        },
+        {
+          id: 56,
+          category: "Public Service Relation",
+          question:
+            "The term 'Due Process' in public service governance primarily emphasizes:",
+          options: [
+            "Speed over accuracy",
+            "Transparency, accountability, and adherence to rules in official actions",
+            "Bypassing protocols for faster results",
+            "Using personal discretion exclusively",
+          ],
+          correctAnswer:
+            "Transparency, accountability, and adherence to rules in official actions",
+        },
+        {
+          id: 57,
+          category: "Public Service Relation",
+          question:
+            "An officer on a probationary appointment is generally eligible for confirmation after how many years, subject to satisfactory performance?",
+          options: ["One year", "Two years", "Three years", "Six months"],
+          correctAnswer: "Two years",
+        },
+        {
+          id: 58,
+          category: "Public Service Relation",
+          question:
+            "The core value of 'Accountability' in the Nigerian Civil Service requires public servants to:",
+          options: [
+            "Be friendly with colleagues",
+            "Be ethically responsible and safeguard public interest in service delivery",
+            "Always agree with their superiors",
+            "Focus only on personal career advancement",
+          ],
+          correctAnswer:
+            "Be ethically responsible and safeguard public interest in service delivery",
+        },
+        {
+          id: 59,
+          category: "Public Service Relation",
+          question:
+            "What is the maximum age for appointment into the Federal Public Service?",
+          options: ["45 years", "50 years", "55 years", "60 years"],
+          correctAnswer: "50 years",
+        },
+        {
+          id: 60,
+          category: "Public Service Relation",
+          question:
+            "An officer who is absent from duty without leave for a continuous period of 7 working days is deemed to have:",
+          options: [
+            "Gone on unauthorized leave",
+            "Vacated his/her post",
+            "Been granted special leave",
+            "Gone for training",
+          ],
+          correctAnswer: "Vacated his/her post",
+        },
+        {
+          id: 61,
+          category: "Public Service Relation",
+          question:
+            "The power to dismiss a Director (GL 17) for serious misconduct lies primarily with the:",
+          options: [
+            "Head of the Department",
+            "Minister of the Ministry",
+            "Federal Civil Service Commission (FCSC)",
+            "President of Nigeria",
+          ],
+          correctAnswer: "Federal Civil Service Commission (FCSC)",
+        },
+        {
+          id: 62,
+          category: "Public Service Relation",
+          question:
+            "In public financial regulations, the annual budget of a Ministry is referred to as:",
+          options: [
+            "The Financial Forecast",
+            "The Appropriation Bill",
+            "The Expenditure Estimate",
+            "The Consolidated Fund",
+          ],
+          correctAnswer: "The Appropriation Bill",
+        },
+        {
+          id: 63,
+          category: "Public Service Relation",
+          question:
+            "What is the official retirement age for a public servant in Nigeria, or the maximum number of years of service, whichever comes first?",
+          options: [
+            "60 years or 30 years of service",
+            "65 years or 35 years of service",
+            "60 years or 35 years of service",
+            "55 years or 30 years of service",
+          ],
+          correctAnswer: "60 years or 35 years of service",
+        },
+        {
+          id: 64,
+          category: "Public Service Relation",
+          question:
+            "The procedure for the condemnation and disposal of unserviceable Government stores and equipment is outlined in the:",
+          options: [
+            "UBE Act",
+            "Civil Service Handbook",
+            "Financial Regulations",
+            "Public Procurement Act",
+          ],
+          correctAnswer: "Financial Regulations",
+        },
+        {
+          id: 65,
+          category: "Public Service Relation",
+          question:
+            "An 'Acting Appointment' is made primarily for the purpose of:",
+          options: [
+            "Trial promotion to a higher rank",
+            "Filling a temporary vacancy in a higher post",
+            "Compensating a junior officer",
+            "Allowing an officer to proceed on leave",
+          ],
+          correctAnswer: "Filling a temporary vacancy in a higher post",
+        },
+        {
+          id: 66,
+          category: "Public Service Relation",
+          question:
+            "What does the acronym 'PCC' stand for in the context of public procurement in Nigeria?",
+          options: [
+            "Public Contracting Committee",
+            "Procurement Clearance Certificate",
+            "Procurement Compliance Certificate",
+            "Public Consumer Council",
+          ],
+          correctAnswer: "Procurement Compliance Certificate",
+        },
+        {
+          id: 67,
+          category: "Public Service Relation",
+          question:
+            "The Public Procurement Act of 2007 established which regulatory body?",
+          options: [
+            "Bureau of Public Service Reforms (BPSR)",
+            "Bureau of Public Procurement (BPP)",
+            "Office of the Auditor-General",
+            "Federal Character Commission",
+          ],
+          correctAnswer: "Bureau of Public Procurement (BPP)",
+        },
+        {
+          id: 68,
+          category: "Public Service Relation",
+          question:
+            "What penalty is usually imposed for the first conviction of a parent who violates Section 2(2) of the UBE Act?",
+          options: [
+            "Fine of N5,000",
+            "Imprisonment for one month",
+            "Reprimand",
+            "Dismissal from public service",
+          ],
+          correctAnswer: "Reprimand",
+        },
+        {
+          id: 69,
+          category: "Public Service Relation",
+          question:
+            "Which type of leave is granted to an officer proceeding on a course of instruction relevant to his official duties?",
+          options: [
+            "Casual leave",
+            "Examination leave",
+            "Leave with pay",
+            "Sick leave",
+          ],
+          correctAnswer: "Leave with pay",
+        },
+        {
+          id: 70,
+          category: "Public Service Relation",
+          question:
+            "The PSR requires an officer to spend a minimum number of years on a post before being eligible for promotion. What is the standard minimum for moving to the Directorate level (GL 17)?",
+          options: ["Two years", "Three years", "Four years", "Five years"],
+          correctAnswer: "Four years",
+        },
+        {
+          id: 71,
+          category: "Public Service Relation",
+          question:
+            "In the Federal Civil Service, who is generally the Chief Accounting Officer of a Ministry?",
+          options: [
+            "The Minister",
+            "The Permanent Secretary",
+            "The Director of Finance",
+            "The Head of Civil Service of the Federation",
+          ],
+          correctAnswer: "The Permanent Secretary",
+        },
+        {
+          id: 72,
+          category: "Public Service Relation",
+          question:
+            "The concept of 'Federal Character' in appointments is enshrined in the Nigerian Constitution to ensure:",
+          options: [
+            "Political party dominance",
+            "Equity and distribution of posts among states and geopolitical zones",
+            "Nepotism and favouritism",
+            "Appointment of only professionals",
+          ],
+          correctAnswer:
+            "Equity and distribution of posts among states and geopolitical zones",
+        },
+        {
+          id: 73,
+          category: "Public Service Relation",
+          question:
+            "An officer found guilty of 'gross misconduct' may face immediate:",
+          options: [
+            "Warning",
+            "Stoppage of allowance",
+            "Dismissal",
+            "Transfer",
+          ],
+          correctAnswer: "Dismissal",
+        },
+        {
+          id: 74,
+          category: "Public Service Relation",
+          question:
+            "The PSR emphasizes that promotion must be strictly based on:",
+          options: [
+            "Seniority and tribal affiliation",
+            "Merit and establishment vacancy",
+            "Political lobbying",
+            "Personal relationship with the Minister",
+          ],
+          correctAnswer: "Merit and establishment vacancy",
+        },
+        {
+          id: 75,
+          category: "Public Service Relation",
+          question:
+            "The financial limit for goods that can be procured using the 'shopping' method (as opposed to competitive bidding) is determined by the:",
+          options: [
+            "Office of the Secretary to the Government",
+            "Bureau of Public Procurement (BPP)",
+            "National Assembly",
+            "Federal Ministry of Finance",
+          ],
+          correctAnswer: "Bureau of Public Procurement (BPP)",
+        },
+        {
+          id: 76,
+          category: "Public Service Relation",
+          question:
+            "Which allowance is granted to an officer appointed from outside Nigeria to enable them to settle down?",
+          options: [
+            "Utility Allowance",
+            "Acting Allowance",
+            "Resettlement Allowance (Disturbance Allowance)",
+            "Kilometer Allowance",
+          ],
+          correctAnswer: "Resettlement Allowance (Disturbance Allowance)",
+        },
+        {
+          id: 77,
+          category: "Public Service Relation",
+          question:
+            "An officer must refund any expenditure made by the government in transporting them and their family if they:",
+          options: [
+            "Retire normally",
+            "Are promoted",
+            "Relinquish appointment during probation",
+            "Proceed on annual leave",
+          ],
+          correctAnswer: "Relinquish appointment during probation",
+        },
+        {
+          id: 78,
+          category: "Public Service Relation",
+          question:
+            "Which of the following is an example of 'misconduct' according to the PSR?",
+          options: [
+            "Holding more than one full-time job",
+            "Wilful damage of government property",
+            "Sexual harassment",
+            "All of the above",
+          ],
+          correctAnswer: "All of the above",
+        },
+        {
+          id: 79,
+          category: "Public Service Relation",
+          question:
+            "The PSR requires that a Director (HRM) should be the Chairman of which committee in a Ministry?",
+          options: [
+            "Tenders Board",
+            "Welfare Committee",
+            "Junior Staff Committee (Local)",
+            "Staff Promotions Committee",
+          ],
+          correctAnswer: "Staff Promotions Committee",
+        },
+        {
+          id: 80,
+          category: "Public Service Relation",
+          question:
+            "What document must accompany an application for conversion into a new cadre?",
+          options: [
+            "A letter of recommendation from the State Governor",
+            "Evidence of additional qualifications and good APERs",
+            "A cheque for N100,000",
+            "A political party membership card",
+          ],
+          correctAnswer: "Evidence of additional qualifications and good APERs",
+        },
+        {
+          id: 81,
+          category: "Public Service Relation",
+          question:
+            "What must an officer obtain before entering into any private business or professional practice?",
+          options: [
+            "A license from the State Government",
+            "The express permission of the Head of Service or relevant authority",
+            "A certificate of incorporation",
+            "A bank loan",
+          ],
+          correctAnswer:
+            "The express permission of the Head of Service or relevant authority",
+        },
+        {
+          id: 82,
+          category: "Public Service Relation",
+          question:
+            "The PSR provides for disciplinary control to be exercised over officers to maintain:",
+          options: [
+            "Political alignment",
+            "Efficiency and integrity in the Service",
+            "Personal relationships",
+            "High profit margins",
+          ],
+          correctAnswer: "Efficiency and integrity in the Service",
+        },
+        {
+          id: 83,
+          category: "Public Service Relation",
+          question:
+            "The maximum duration for a Temporary Appointment in the Federal Civil Service is usually:",
+          options: [
+            "12 months, renewable annually",
+            "6 months, renewable once",
+            "Until a substantive officer is appointed",
+            "Indefinite",
+          ],
+          correctAnswer: "Until a substantive officer is appointed",
+        },
+        {
+          id: 84,
+          category: "Public Service Relation",
+          question:
+            "Which document sets out the specific qualifications and career path for each cadre in the public service?",
+          options: [
+            "Scheme of Service",
+            "Financial Regulations",
+            "Annual Budget",
+            "Public Service Handbook",
+          ],
+          correctAnswer: "Scheme of Service",
+        },
+        {
+          id: 85,
+          category: "Public Service Relation",
+          question:
+            "What is the weight assigned to 'Seniority' in the promotion process for officers (GL 07 and above)?",
+          options: ["0%", "10%", "20%", "30%"],
+          correctAnswer: "10%",
+        },
+        {
+          id: 86,
+          category: "Public Service Relation",
+          question:
+            "A Director is generally required to possess strong knowledge of the Public Service Rules (PSR) to effectively handle:",
+          options: [
+            "Financial investments",
+            "Staff discipline and performance management",
+            "Private sector marketing",
+            "International trade agreements",
+          ],
+          correctAnswer: "Staff discipline and performance management",
+        },
+        {
+          id: 87,
+          category: "Public Service Relation",
+          question:
+            "The primary aim of the Contributory Pension Scheme (CPS) in Nigeria is to:",
+          options: [
+            "Eliminate gratuity payments",
+            "Ensure retirees receive their benefits promptly",
+            "Fund government projects",
+            "Replace the civil service structure",
+          ],
+          correctAnswer: "Ensure retirees receive their benefits promptly",
+        },
+        {
+          id: 88,
+          category: "Public Service Relation",
+          question:
+            "What is the official term for a period of temporary release of an officer to another organization, usually for a fixed term?",
+          options: ["Transfer", "Secondment", "Acting Duty", "Deployment"],
+          correctAnswer: "Secondment",
+        },
+        {
+          id: 89,
+          category: "Public Service Relation",
+          question:
+            "The issuance of official circulars or gazettes in the Federal Civil Service is usually done by the:",
+          options: [
+            "Supreme Court",
+            "Office of the Head of the Civil Service of the Federation (OHCSF)",
+            "National Assembly",
+            "Office of the President",
+          ],
+          correctAnswer:
+            "Office of the Head of the Civil Service of the Federation (OHCSF)",
+        },
+        {
+          id: 90,
+          category: "Public Service Relation",
+          question:
+            "The PSR mandates that all officers must be medically fit for government service, certified by:",
+          options: [
+            "A traditional healer",
+            "An authorized health care provider",
+            "A private gym instructor",
+            "The Local Government Chairman",
+          ],
+          correctAnswer: "An authorized health care provider",
+        },
+        {
+          id: 91,
+          category: "Public Service Relation",
+          question:
+            "What is the recommended approach for resolving conflict between colleagues in the public service?",
+          options: [
+            "Physical fight",
+            "Ignoring the issue indefinitely",
+            "Using established grievance procedures and mediation",
+            "Reporting directly to the President",
+          ],
+          correctAnswer: "Using established grievance procedures and mediation",
+        },
+        {
+          id: 92,
+          category: "Public Service Relation",
+          question:
+            "Public Servants are generally forbidden from disclosing official information classified as:",
+          options: [
+            "Open access data",
+            "Secret or confidential",
+            "Public policy goals",
+            "Information already published",
+          ],
+          correctAnswer: "Secret or confidential",
+        },
+        {
+          id: 93,
+          category: "Public Service Relation",
+          question:
+            "The practice of 'Monetization' in the public service refers to:",
+          options: [
+            "Printing new currency",
+            "Converting certain non-salary fringe benefits (like official residences) into cash allowances",
+            "Investing government funds in the stock market",
+            "Collecting taxes",
+          ],
+          correctAnswer:
+            "Converting certain non-salary fringe benefits (like official residences) into cash allowances",
+        },
+        {
+          id: 94,
+          category: "Public Service Relation",
+          question:
+            "What is the purpose of a 'Handing Over Note' in the public service?",
+          options: [
+            "To announce retirement",
+            "To officially transfer responsibilities, assets, and ongoing tasks to a successor",
+            "To ask for a salary increase",
+            "To file a formal complaint",
+          ],
+          correctAnswer:
+            "To officially transfer responsibilities, assets, and ongoing tasks to a successor",
+        },
+        {
+          id: 95,
+          category: "Public Service Relation",
+          question:
+            "The Federal Character Commission (FCC) primarily focuses on ensuring:",
+          options: [
+            "Financial accountability",
+            "Geographical spread in appointments",
+            "Military recruitment",
+            "Educational curriculum content",
+          ],
+          correctAnswer: "Geographical spread in appointments",
+        },
+        {
+          id: 96,
+          category: "Public Service Relation",
+          question:
+            "In the public procurement process, 'Solicitation' is the step immediately following:",
+          options: [
+            "Contract award",
+            "Needs assessment",
+            "Payment",
+            "Disposal",
+          ],
+          correctAnswer: "Needs assessment",
+        },
+        {
+          id: 97,
+          category: "Public Service Relation",
+          question:
+            "What is the main significance of an officer's appointment being 'confirmed'?",
+          options: [
+            "They can now retire immediately",
+            "They acquire pensionable status",
+            "They are eligible for transfer outside Nigeria only",
+            "They get a new office desk",
+          ],
+          correctAnswer: "They acquire pensionable status",
+        },
+        {
+          id: 98,
+          category: "Public Service Relation",
+          question:
+            "Public Service ethics require officers to avoid situations that could lead to a:",
+          options: [
+            "Promotion",
+            "Conflict of Interest",
+            "Successful project completion",
+            "Positive APER rating",
+          ],
+          correctAnswer: "Conflict of Interest",
+        },
+        {
+          id: 99,
+          category: "Public Service Relation",
+          question:
+            "The 'Disengagement Allowance' is paid to an officer who is:",
+          options: [
+            "Newly recruited",
+            "Retiring or leaving the service on certain grounds",
+            "Acting in a higher capacity",
+            "On annual leave",
+          ],
+          correctAnswer: "Retiring or leaving the service on certain grounds",
+        },
+        {
+          id: 100,
+          category: "Public Service Relation",
+          question:
+            "What document is usually required to be attached to a promotion brief, showing an officer's career progression and grades?",
+          options: [
+            "A photograph",
+            "The officer's Career Progression Chart (CPC)",
+            "A marriage certificate",
+            "A newspaper clipping",
+          ],
+          correctAnswer: "The officer's Career Progression Chart (CPC)",
+        },
+
+        // --- SECTION C: GENERAL KNOWLEDGE (G101-G150) ---
+        {
+          id: 101,
+          category: "General Knowledge",
+          question:
+            "Who is the current President of the Federal Republic of Nigeria as of 2025?",
+          options: [
+            "Muhammadu Buhari",
+            "Yemi Osinbajo",
+            "Bola Ahmed Tinubu",
+            "Atiku Abubakar",
+          ],
+          correctAnswer: "Bola Ahmed Tinubu",
+        },
+        {
+          id: 102,
+          category: "General Knowledge",
+          question: "Nigeria officially gained independence on which date?",
+          options: [
+            "October 1, 1963",
+            "January 1, 1914",
+            "October 1, 1960",
+            "May 27, 1967",
+          ],
+          correctAnswer: "October 1, 1960",
+        },
+        {
+          id: 103,
+          category: "General Knowledge",
+          question:
+            "The Nigerian Civil War (Biafra War) officially started and ended in which years?",
+          options: ["1966-1970", "1960-1963", "1967-1970", "1970-1975"],
+          correctAnswer: "1967-1970",
+        },
+        {
+          id: 104,
+          category: "General Knowledge",
+          question:
+            "The red eagle on the Nigerian Coat of Arms primarily represents:",
+          options: ["Peace", "Prosperity", "Unity", "Strength"],
+          correctAnswer: "Strength",
+        },
+        {
+          id: 105,
+          category: "General Knowledge",
+          question: "Who was Nigeria's first military Head of State?",
+          options: [
+            "Gen. Yakubu Gowon",
+            "Gen. Murtala Mohammed",
+            "Major Gen. Johnson Aguiyi-Ironsi",
+            "Gen. Olusegun Obasanjo",
+          ],
+          correctAnswer: "Major Gen. Johnson Aguiyi-Ironsi",
+        },
+        {
+          id: 106,
+          category: "General Knowledge",
+          question:
+            "Nigeria's current democratic Fourth Republic began in which year?",
+          options: ["1979", "1999", "1983", "1993"],
+          correctAnswer: "1999",
+        },
+        {
+          id: 107,
+          category: "General Knowledge",
+          question:
+            "The Federal Capital Territory (FCT), Abuja, was officially created in which year?",
+          options: ["1960", "1976", "1991", "1980"],
+          correctAnswer: "1976",
+        },
+        {
+          id: 108,
+          category: "General Knowledge",
+          question: "The acronym ECOWAS stands for:",
+          options: [
+            "Economic Council of West African States",
+            "Economic Community of Western African Society",
+            "Economic Community of West African States",
+            "Environmental Council of West African Society",
+          ],
+          correctAnswer: "Economic Community of West African States",
+        },
+        {
+          id: 109,
+          category: "General Knowledge",
+          question: "Which is the most populous country in Africa?",
+          options: ["Egypt", "Ethiopia", "Nigeria", "South Africa"],
+          correctAnswer: "Nigeria",
+        },
+        {
+          id: 110,
+          category: "General Knowledge",
+          question: "What is the motto of the Nigerian Police Force?",
+          options: [
+            "Justice for All",
+            "The Police are Your Friends",
+            "Service and Integrity",
+            "Force for Good",
+          ],
+          correctAnswer: "The Police are Your Friends",
+        },
+        {
+          id: 111,
+          category: "General Knowledge",
+          question: "The current Nigerian Senate President as of 2025 is:",
+          options: [
+            "Bukola Saraki",
+            "Ahmad Lawan",
+            "Godswill Obot Akpabio",
+            "David Mark",
+          ],
+          correctAnswer: "Godswill Obot Akpabio",
+        },
+        {
+          id: 112,
+          category: "General Knowledge",
+          question:
+            "The Central Bank of Nigeria (CBN) was established in which year?",
+          options: ["1958", "1960", "1971", "1985"],
+          correctAnswer: "1958",
+        },
+        {
+          id: 113,
+          category: "General Knowledge",
+          question:
+            "How many senatorial districts does each of the 36 states of Nigeria have (except FCT)?",
+          options: ["Two", "Three", "Four", "One"],
+          correctAnswer: "Three",
+        },
+        {
+          id: 114,
+          category: "General Knowledge",
+          question:
+            "The first Nigerian professional to qualify as a female psychiatrist was:",
+          options: [
+            "Prof. Dora Akunyili",
+            "Dr. Stella Adadevoh",
+            "Dr. Bertha Johnson",
+            "Mrs. Funmilayo Ransome-Kuti",
+          ],
+          correctAnswer: "Dr. Bertha Johnson",
+        },
+        {
+          id: 115,
+          category: "General Knowledge",
+          question: "What significant event happened in Nigeria in 1914?",
+          options: [
+            "First coup d'état",
+            "Oil discovery",
+            "Amalgamation of Northern and Southern Protectorates",
+            "End of the Civil War",
+          ],
+          correctAnswer: "Amalgamation of Northern and Southern Protectorates",
+        },
+        {
+          id: 116,
+          category: "General Knowledge",
+          question:
+            "The highest honour bestowed upon a Head of State in Nigeria is the:",
+          options: ["CFR", "OON", "GCFR", "CON"],
+          correctAnswer: "GCFR",
+        },
+        {
+          id: 117,
+          category: "General Knowledge",
+          question:
+            "The major ethnic groups in Nigeria are typically categorized as:",
+          options: [
+            "Igala, Tiv, Idoma",
+            "Hausa, Igbo, Yoruba",
+            "Ijaw, Efik, Kalabari",
+            "Edo, Urhobo, Itsekiri",
+          ],
+          correctAnswer: "Hausa, Igbo, Yoruba",
+        },
+        {
+          id: 118,
+          category: "General Knowledge",
+          question:
+            "The legislative arm of the Nigerian Federal Government is known as the:",
+          options: [
+            "Federal Executive Council (FEC)",
+            "National Assembly",
+            "Judiciary",
+            "Federal Civil Service Commission (FCSC)",
+          ],
+          correctAnswer: "National Assembly",
+        },
+        {
+          id: 119,
+          category: "General Knowledge",
+          question: "Democracy Day in Nigeria is celebrated on:",
+          options: ["May 29", "October 1", "June 12", "January 15"],
+          correctAnswer: "June 12",
+        },
+        {
+          id: 120,
+          category: "General Knowledge",
+          question:
+            "The current Minister of Education of the Federal Republic of Nigeria as of 2025 is:",
+          options: [
+            "Nyesom Wike",
+            "Olayemi Cardoso",
+            "Prof. Tahir Mamman",
+            "Godswill Akpabio",
+          ],
+          correctAnswer: "Prof. Tahir Mamman",
+        },
+        {
+          id: 121,
+          category: "General Knowledge",
+          question:
+            "Which international organization's headquarters is in Abuja, Nigeria?",
+          options: [
+            "United Nations (UN)",
+            "African Union (AU)",
+            "ECOWAS",
+            "OPEC",
+          ],
+          correctAnswer: "ECOWAS",
+        },
+        {
+          id: 122,
+          category: "General Knowledge",
+          question: "The official language of Nigeria is:",
+          options: ["Hausa", "French", "English Language", "Pidgin"],
+          correctAnswer: "English Language",
+        },
+        {
+          id: 123,
+          category: "General Knowledge",
+          question:
+            "The current Governor of the Central Bank of Nigeria (CBN) as of 2025 is:",
+          options: [
+            "Sanusi Lamido",
+            "Godwin Emefiele",
+            "Mr. Olayemi Cardoso",
+            "Tunde Lemo",
+          ],
+          correctAnswer: "Mr. Olayemi Cardoso",
+        },
+        {
+          id: 124,
+          category: "General Knowledge",
+          question: "The highest court in the Nigerian judicial system is the:",
+          options: [
+            "Federal High Court",
+            "Court of Appeal",
+            "Supreme Court",
+            "Sharia Court of Appeal",
+          ],
+          correctAnswer: "Supreme Court",
+        },
+        {
+          id: 125,
+          category: "General Knowledge",
+          question:
+            "The primary function of the National Agency for Food and Drug Administration and Control (NAFDAC) is to:",
+          options: [
+            "Control the stock market",
+            "Regulate and control food, drugs, and other regulated products",
+            "Manage the armed forces",
+            "Build federal roads",
+          ],
+          correctAnswer:
+            "Regulate and control food, drugs, and other regulated products",
+        },
+        {
+          id: 126,
+          category: "General Knowledge",
+          question:
+            "The first Nigerian to win the Nobel Prize for Literature is:",
+          options: [
+            "Chinua Achebe",
+            "Wole Soyinka",
+            "Chimamanda Ngozi Adichie",
+            "Ken Saro-Wiwa",
+          ],
+          correctAnswer: "Wole Soyinka",
+        },
+        {
+          id: 127,
+          category: "General Knowledge",
+          question:
+            "Which river is the most important river in Nigeria, giving the country its name?",
+          options: ["River Volta", "River Niger", "River Benue", "River Cross"],
+          correctAnswer: "River Niger",
+        },
+        {
+          id: 128,
+          category: "General Knowledge",
+          question:
+            "The green colour in the Nigerian national flag represents:",
+          options: [
+            "Peace and Unity",
+            "Fertile land and agriculture",
+            "Oil wealth",
+            "Hope",
+          ],
+          correctAnswer: "Fertile land and agriculture",
+        },
+        {
+          id: 129,
+          category: "General Knowledge",
+          question: "The current Vice President of Nigeria as of 2025 is:",
+          options: [
+            "Prof. Yemi Osinbajo",
+            "Kashim Shettima",
+            "Peter Obi",
+            "Goodluck Jonathan",
+          ],
+          correctAnswer: "Kashim Shettima",
+        },
+        {
+          id: 130,
+          category: "General Knowledge",
+          question:
+            "The term 'Mambilla Plateau' is associated with which Nigerian state?",
+          options: ["Kaduna", "Plateau", "Taraba", "Kogi"],
+          correctAnswer: "Taraba",
+        },
+        {
+          id: 131,
+          category: "General Knowledge",
+          question:
+            "Which year marked the creation of the first 12 states in Nigeria?",
+          options: ["1960", "1963", "1967", "1976"],
+          correctAnswer: "1967",
+        },
+        {
+          id: 132,
+          category: "General Knowledge",
+          question: "What does the acronym INEC stand for in Nigeria?",
+          options: [
+            "Independent National Education Commission",
+            "International Energy Corporation",
+            "Independent National Electoral Commission",
+            "Infrastructure and Economic Control",
+          ],
+          correctAnswer: "Independent National Electoral Commission",
+        },
+        {
+          id: 133,
+          category: "General Knowledge",
+          question:
+            "The primary role of the National Economic Council (NEC) is to advise the President on:",
+          options: [
+            "Military strategy",
+            "Economic affairs of the Federation, particularly fiscal policy and coordination",
+            "Foreign diplomacy",
+            "Educational curriculum",
+          ],
+          correctAnswer:
+            "Economic affairs of the Federation, particularly fiscal policy and coordination",
+        },
+        {
+          id: 134,
+          category: "General Knowledge",
+          question: "The largest continent in the world by land area is:",
+          options: ["Africa", "Europe", "Asia", "North America"],
+          correctAnswer: "Asia",
+        },
+        {
+          id: 135,
+          category: "General Knowledge",
+          question:
+            "The 'Order of the Niger' (ON) is divided into how many grades?",
+          options: ["One", "Two", "Three", "Four"],
+          correctAnswer: "Four",
+        },
+        {
+          id: 136,
+          category: "General Knowledge",
+          question:
+            "Which Nigerian city was the capital of the Eastern Region during the colonial era?",
+          options: ["Enugu", "Calabar", "Port Harcourt", "Owerri"],
+          correctAnswer: "Enugu",
+        },
+        {
+          id: 137,
+          category: "General Knowledge",
+          question:
+            "The two main components that make up the Nigerian National Assembly are:",
+          options: [
+            "The Presidency and the Senate",
+            "The House of Representatives and the State Houses of Assembly",
+            "The Senate and the House of Representatives",
+            "The State Governors and the Federal Executive Council",
+          ],
+          correctAnswer: "The Senate and the House of Representatives",
+        },
+        {
+          id: 138,
+          category: "General Knowledge",
+          question: "Nigeria shares its western border with which country?",
+          options: ["Cameroon", "Niger", "Chad", "Republic of Benin"],
+          correctAnswer: "Republic of Benin",
+        },
+        {
+          id: 139,
+          category: "General Knowledge",
+          question:
+            "Who was the first Nigerian woman to be appointed as a Federal Minister?",
+          options: [
+            "Prof. Dora Akunyili",
+            "Dr. Ngozi Okonjo-Iweala",
+            "Chief (Mrs.) Tejumade Alakija",
+            "Chief Mrs. Kofoworola Ademola",
+          ],
+          correctAnswer: "Chief (Mrs.) Tejumade Alakija",
+        },
+        {
+          id: 140,
+          category: "General Knowledge",
+          question:
+            "The concept of 'separation of powers' in the Nigerian government refers to the division of powers among:",
+          options: [
+            "Federal, State, and Local Governments",
+            "The President, Vice President, and Senate President",
+            "The Executive, Legislative, and Judicial Arms of Government",
+            "Civil Service, Military, and Police",
+          ],
+          correctAnswer:
+            "The Executive, Legislative, and Judicial Arms of Government",
+        },
+        {
+          id: 141,
+          category: "General Knowledge",
+          question: "The highest mountain peak in Nigeria is:",
+          options: ["Chappal Waddi", "Shere Hills", "Idanre Hills", "Aso Rock"],
+          correctAnswer: "Chappal Waddi",
+        },
+        {
+          id: 142,
+          category: "General Knowledge",
+          question:
+            "The currency of Nigeria is the Naira. It is abbreviated as:",
+          options: ["NGN", "NGD", "NAR", "NRA"],
+          correctAnswer: "NGN",
+        },
+        {
+          id: 143,
+          category: "General Knowledge",
+          question:
+            "Which former Nigerian leader is credited with establishing the National Youth Service Corps (NYSC) scheme?",
+          options: [
+            "Gen. Aguiyi-Ironsi",
+            "Gen. Yakubu Gowon",
+            "Gen. Sani Abacha",
+            "Alhaji Shehu Shagari",
+          ],
+          correctAnswer: "Gen. Yakubu Gowon",
+        },
+        {
+          id: 144,
+          category: "General Knowledge",
+          question:
+            "The largest freshwater lake in West Africa, located in Nigeria, is:",
+          options: ["Kainji Lake", "Lake Chad", "Lake Victoria", "Lake Tchad"],
+          correctAnswer: "Lake Chad",
+        },
+        {
+          id: 145,
+          category: "General Knowledge",
+          question:
+            "The official coat of arms of Nigeria features two horses, which symbolize:",
+          options: ["Unity", "Dignity", "Strength and Pride", "Speed"],
+          correctAnswer: "Dignity",
+        },
+        {
+          id: 146,
+          category: "General Knowledge",
+          question: "The first capital of Nigeria was:",
+          options: ["Enugu", "Lagos", "Ibadan", "Abuja"],
+          correctAnswer: "Lagos",
+        },
+        {
+          id: 147,
+          category: "General Knowledge",
+          question: "The Nigerian National Pledge was composed by:",
+          options: [
+            "Wole Soyinka",
+            "Tai Solarin",
+            "Felicia Adebola Adedoyin",
+            "Akinola Aguda",
+          ],
+          correctAnswer: "Felicia Adebola Adedoyin",
+        },
+        {
+          id: 148,
+          category: "General Knowledge",
+          question: "The current Chief Justice of Nigeria (CJN) as of 2025 is:",
+          options: [
+            "Walter Onnoghen",
+            "Ibrahim Tanko Muhammad",
+            "Olukayode Ariwoola",
+            "Mahmud Mohammed",
+          ],
+          correctAnswer: "Olukayode Ariwoola",
+        },
+        {
+          id: 149,
+          category: "General Knowledge",
+          question:
+            "The organization of African Unity (OAU), which Nigeria was a founding member of, was replaced by the African Union (AU) in which year?",
+          options: ["1999", "2002", "1994", "2000"],
+          correctAnswer: "2002",
+        },
+        {
+          id: 150,
+          category: "General Knowledge",
+          question:
+            "The Nigerian oil industry is concentrated in which region of the country?",
+          options: [
+            "North-Central",
+            "South-West",
+            "South-South (Niger Delta)",
+            "North-East",
+          ],
+          correctAnswer: "South-South (Niger Delta)",
+        },
+      ];
+
+      // --- EXAM STATE AND CONSTANTS ---
+      let currentQuestionIndex = 0;
+      let score = 0;
+      const totalQuestions = QUESTIONS.length;
+      const examDuration = 60 * 60; // 60 minutes in seconds
+      let timeLeft = examDuration;
+      let timerInterval;
+      let userAnswers = new Array(totalQuestions).fill(null); // Stores the index of the selected option (0, 1, 2, 3)
+      let isAnswered = new Array(totalQuestions).fill(false); // Tracks if the question has been answered
+
+      // --- DOM ELEMENTS ---
+      const examContent = document.getElementById("exam-content");
+      const startScreen = document.getElementById("start-screen");
+      const startButton = document.getElementById("start-button");
+      const timerDisplay = document.getElementById("timer-display");
+      const scoreDisplay = document.getElementById("score-display");
+      const resultModal = document.getElementById("result-modal");
+      const finalPercentage = document.getElementById("final-percentage");
+      const resultAnswered = document.getElementById("result-answered");
+
+      // --- UTILITY FUNCTIONS ---
+
+      /**
+       * Formats seconds into MM:SS format.
+       * @param {number} totalSeconds
+       * @returns {string} Formatted time string
+       */
+      function formatTime(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+          2,
+          "0"
+        )}`;
+      }
+
+      /**
+       * Calculates and updates the score percentage display.
+       */
+      function updateScoreDisplay() {
+        const answeredCorrectly = userAnswers.filter(
+          (ans, index) =>
+            ans !== null &&
+            QUESTIONS[index].options[ans] === QUESTIONS[index].correctAnswer
+        ).length;
+        score = answeredCorrectly;
+        const percentage = ((score / totalQuestions) * 100).toFixed(2);
+        scoreDisplay.textContent = `Score: ${percentage}%`;
+      }
+
+      /**
+       * Determines the section name based on question ID.
+       */
+      function getSectionName(id) {
+        if (id >= 1 && id <= 50) return "Section A: Education";
+        if (id >= 51 && id <= 100) return "Section B: Public Service Relation";
+        if (id >= 101 && id <= 150) return "Section C: General Knowledge";
+        return "Unknown Section";
+      }
+
+      // --- TIMER LOGIC ---
+
+      /**
+       * Starts the 60-minute countdown timer.
+       */
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timeLeft = 0;
+            endExam(true); // End exam forcefully due to time up
+            return;
+          }
+          timeLeft--;
+          timerDisplay.textContent = `Time: ${formatTime(timeLeft)}`;
+
+          // Change timer color when running low
+          if (timeLeft <= 300) {
+            // 5 minutes left
+            timerDisplay.classList.remove("bg-red-100", "text-red-700");
+            timerDisplay.classList.add("bg-yellow-200", "text-yellow-800");
+          }
+        }, 1000);
+      }
+
+      // --- CORE EXAM LOGIC ---
+
+      /**
+       * Displays the current question and its options.
+       * @param {number} index - Index of the question to load.
+       */
+      function loadQuestion(index) {
+        if (index < 0 || index >= totalQuestions) return;
+
+        currentQuestionIndex = index;
+        const qData = QUESTIONS[index];
+        const sectionName = getSectionName(qData.id);
+        const questionNumber = index + 1;
+
+        let optionsHtml = "";
+
+        // Generate options HTML
+        qData.options.forEach((option, optionIndex) => {
+          const isSelected = userAnswers[index] === optionIndex;
+          const isCorrect = option === qData.correctAnswer;
+
+          let classList =
+            "option-button w-full p-4 text-left border-2 border-gray-200 rounded-xl hover:border-indigo-400 transition duration-150 text-gray-800 bg-white shadow-sm hover:shadow-md";
+
+          if (isAnswered[index]) {
+            // Instant Feedback applied after answering
+            if (isSelected) {
+              classList = isCorrect
+                ? "option-button correct-answer"
+                : "option-button wrong-answer";
+            } else if (isCorrect) {
+              classList = "option-button correct-answer";
+            } else {
+              classList = "option-button";
+            }
+            classList += " pointer-events-none"; // Disable click after feedback
+          } else if (isSelected) {
+            // Highlight selected but not yet confirmed (since we give instant feedback, this case is mainly for navigation)
+            classList += " selected-option";
+          }
+
+          optionsHtml += `
+                    <button data-option-index="${optionIndex}"
+                            class="${classList}"
+                            ${isAnswered[index] ? "disabled" : ""}
+                            onclick="handleAnswer(${optionIndex}, this)">
+                        <span class="font-semibold text-indigo-500 mr-2">${String.fromCharCode(
+                          65 + optionIndex
+                        )}.</span> ${option}
+                    </button>
+                `;
+        });
+
+        // Generate main content HTML
+        examContent.innerHTML = `
+                <div class="mb-4 text-sm font-medium text-indigo-500">${sectionName} (Question ${questionNumber} of ${totalQuestions})</div>
+                <div class="mb-8 p-4 bg-indigo-50 rounded-lg shadow-inner">
+                    <p class="text-xl font-semibold text-gray-800">${questionNumber}. ${
+          qData.question
+        }</p>
+                </div>
+                
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    ${optionsHtml}
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                    <button onclick="navigateQuestion(-1)" ${
+                      index === 0 ? "disabled" : ""
+                    }
+                            class="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-full hover:bg-gray-400 transition disabled:opacity-50">
+                        &larr; Previous
+                    </button>
+                    
+                    ${
+                      index === totalQuestions - 1
+                        ? `<button onclick="endExam(false)"
+                                class="px-8 py-3 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition duration-150 shadow-lg">
+                                Submit Exam
+                            </button>`
+                        : `<button id="next-button" onclick="navigateQuestion(1)" ${
+                            !isAnswered[index] ? "disabled" : ""
+                          }
+                                class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-full hover:bg-indigo-700 transition disabled:opacity-50">
+                                Next &rarr;
+                            </button>`
+                    }
+                </div>
+            `;
+      }
+
+      /**
+       * Handles the user selecting an answer. Provides instant feedback.
+       * @param {number} selectedIndex - The index of the option selected (0-3).
+       * @param {HTMLElement} selectedButton - The button element clicked.
+       */
+      function handleAnswer(selectedIndex, selectedButton) {
+        if (isAnswered[currentQuestionIndex]) return;
+
+        userAnswers[currentQuestionIndex] = selectedIndex;
+        isAnswered[currentQuestionIndex] = true;
+
+        const qData = QUESTIONS[currentQuestionIndex];
+        const allOptions = document.querySelectorAll(
+          "#options-container button"
+        );
+
+        allOptions.forEach((button) => {
+          const optionIndex = parseInt(button.dataset.optionIndex);
+          const optionText = qData.options[optionIndex];
+
+          button.disabled = true; // Disable all options after selection
+
+          if (optionText === qData.correctAnswer) {
+            // Highlight the correct answer in green
+            button.classList.add("correct-answer");
+          } else if (optionIndex === selectedIndex) {
+            // Highlight the WRONG selected answer in red
+            button.classList.add("wrong-answer");
+          } else {
+            // Dim unselected options
+            button.classList.add("opacity-50");
+          }
+        });
+
+        updateScoreDisplay();
+
+        // FIX: Directly target the Next button by its new ID to ensure it is enabled.
+        const nextButton = document.getElementById("next-button");
+        if (nextButton) {
+          // Remove the 'disabled' attribute so the button becomes clickable and the opacity class is lifted.
+          nextButton.disabled = false;
+        }
+      }
+
+      /**
+       * Navigates to the next or previous question.
+       * @param {number} direction - 1 for next, -1 for previous.
+       */
+      function navigateQuestion(direction) {
+        const nextIndex = currentQuestionIndex + direction;
+        if (nextIndex >= 0 && nextIndex < totalQuestions) {
+          loadQuestion(nextIndex);
+        }
+      }
+
+      /**
+       * Ends the exam and displays the results.
+       * @param {boolean} isTimedOut - Whether the exam ended due to time.
+       */
+      function endExam(isTimedOut) {
+        clearInterval(timerInterval);
+        examContent.innerHTML = ""; // Clear main content
+        startScreen.classList.add("hidden"); // Hide start screen
+
+        const answeredCount = isAnswered.filter((a) => a).length;
+        const answeredCorrectly = userAnswers.filter(
+          (ans, index) =>
+            ans !== null &&
+            QUESTIONS[index].options[ans] === QUESTIONS[index].correctAnswer
+        ).length;
+        const finalPercent = (
+          (answeredCorrectly / totalQuestions) *
+          100
+        ).toFixed(2);
+
+        // Populate modal
+        document.getElementById(
+          "result-answered"
+        ).textContent = `${answeredCorrectly} / ${answeredCount} answered correctly`;
+        finalPercentage.textContent = `${finalPercent}%`;
+
+        if (isTimedOut) {
+          document.querySelector("#result-modal h2").textContent = "TIME UP!";
+          document
+            .querySelector("#result-modal h2")
+            .classList.replace("text-indigo-700", "text-red-700");
+        } else {
+          document.querySelector("#result-modal h2").textContent =
+            "EXAM COMPLETED!";
+          document
+            .querySelector("#result-modal h2")
+            .classList.replace("text-red-700", "text-indigo-700");
+        }
+
+        resultModal.classList.remove("hidden");
+      }
+
+      /**
+       * Initializes the exam application.
+       */
+      function init() {
+        startButton.addEventListener("click", () => {
+          startScreen.classList.add("hidden");
+          examContent.classList.remove("hidden");
+          startTimer();
+          loadQuestion(0);
+          timerDisplay.textContent = `Time: ${formatTime(timeLeft)}`;
+        });
+      }
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
